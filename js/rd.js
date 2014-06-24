@@ -310,7 +310,7 @@ function Controller(rd) {
 var rd = null, controller = null;
 $(document).ready(function() {
     var $canvas = $('#rd');
-    rd = new RD($canvas[0]).draw().start();
+    rd = new RD( $canvas[0], 1 ).draw().start();
     controller = new Controller(rd);
 });
 
