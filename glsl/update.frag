@@ -16,7 +16,11 @@ float unpack( vec4 c ) {
 
 vec4 pack( float val ) {
     // convert [0,1] to 4x[0,1] (to be stored as bytes)
-    return vec4( val, mod( val*256.0, 1.0 ), mod( val*65536.0, 1.0 ), mod( val*16777216.0, 1.0 ) );
+    float x = mod( floor( val * 256.0 ) / 256.0, 1.0 );
+    float y = mod( floor( val * 256.0 * 256.0 ) / 256.0, 1.0 );
+    float z = mod( floor( val * 256.0 * 256.0 * 256.0 ) / 256.0, 1.0 );
+    float w = mod( floor( val * 256.0 * 256.0 * 256.0 * 256.0 ) / 256.0, 1.0 );
+    return vec4( x, y, z, w );
 }
 
 void main() {
@@ -24,5 +28,7 @@ void main() {
     float e = unpack( get( vec2( -1.0, 0.0 ) ) );
     float w = unpack( get( vec2( 1.0, 0.0 ) ) );
     
-    gl_FragColor = pack( ( c + e + w ) / 3.0 ); // simple horizontal blur
+    float new_val = ( c + e + w ) / 3.0; // simple horizontal blur
+    
+    gl_FragColor = pack( new_val );
 }
