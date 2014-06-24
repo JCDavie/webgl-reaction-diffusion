@@ -90,6 +90,11 @@ RD.prototype.set = function(state) {
         var ii = i * 4;
         rgba[ii + 0] = state[i] ? 255 : 0;
         rgba[ii + 1] = rgba[ii + 2] = rgba[ii + 3] = 0;
+        // actually just set everything to random values for now
+        rgba[ii + 0] = Math.floor(Math.random() * 256); 
+        rgba[ii + 1] = Math.floor(Math.random() * 256); 
+        rgba[ii + 2] = Math.floor(Math.random() * 256); 
+        rgba[ii + 3] = Math.floor(Math.random() * 256); 
     }
     this.textures.front.subset(rgba, 0, 0, this.statesize[0], this.statesize[1]);
     return this;
