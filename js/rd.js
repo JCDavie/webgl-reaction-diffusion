@@ -1,9 +1,9 @@
 /**
- * Game of Life simulation and display.
+ * Reaction-diffusion simulation and display.
  * @param {HTMLCanvasElement} canvas Render target
  * @param {number} [scale] Size of each cell in pixels (power of 2)
  */
-function GOL(canvas, scale) {
+function RD(canvas, scale) {
     var igloo = this.igloo = new Igloo(canvas);
     var gl = igloo.gl;
     if (gl == null) {
@@ -15,7 +15,7 @@ function GOL(canvas, scale) {
     this.viewsize = new Float32Array([w, h]);
     this.statesize = new Float32Array([w / scale, h / scale]);
     this.timer = null;
-    this.lasttick = GOL.now();
+    this.lasttick = RD.now();
     this.fps = 0;
 
     gl.disable(gl.DEPTH_TEST);
@@ -41,7 +41,7 @@ function GOL(canvas, scale) {
 /**
  * @returns {number} The epoch in integer seconds
  */
-GOL.now = function() {
+RD.now = function() {
     return Math.floor(Date.now() / 1000);
 };
 
@@ -50,7 +50,7 @@ GOL.now = function() {
  * @param {Object} state Array-like state object
  * @returns {ArrayBuffer} Compacted bit array
  */
-GOL.compact = function(state) {
+RD.compact = function(state) {
     var compact = new Uint8Array(state.length / 8);
     for (var i = 0; i < state.length; i++) {
         var ii = Math.floor(i / 8),
@@ -66,7 +66,7 @@ GOL.compact = function(state) {
  * @param {ArrayBuffer} compact Compacted bit array
  * @returns {Object} Array-like state object
  */
-GOL.expand = function(buffer) {
+RD.expand = function(buffer) {
     var compact = new Uint8Array(buffer),
         state = new Uint8Array(compact.length * 8);
     for (var i = 0; i < state.length; i++) {
@@ -80,9 +80,9 @@ GOL.expand = function(buffer) {
 /**
  * Set the entire simulation state at once.
  * @param {Object} state Boolean array-like
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.set = function(state) {
+RD.prototype.set = function(state) {
     var gl = this.igloo.gl;
     var rgba = new Uint8Array(this.statesize[0] * this.statesize[1] * 4);
     for (var i = 0; i < state.length; i++) {
@@ -97,9 +97,9 @@ GOL.prototype.set = function(state) {
 /**
  * Fill the entire state with random values.
  * @param {number} [p] Chance of a cell being alive (0.0 to 1.0)
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.setRandom = function(p) {
+RD.prototype.setRandom = function(p) {
     var gl = this.igloo.gl, size = this.statesize[0] * this.statesize[1];
     p = p == null ? 0.5 : p;
     var rand = new Uint8Array(size);
@@ -112,18 +112,18 @@ GOL.prototype.setRandom = function(p) {
 
 /**
  * Clear the simulation state to empty.
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.setEmpty = function() {
+RD.prototype.setEmpty = function() {
     this.set(new Uint8Array(this.statesize[0] * this.statesize[1]));
     return this;
 };
 
 /**
  * Swap the texture buffers.
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.swap = function() {
+RD.prototype.swap = function() {
     var tmp = this.textures.front;
     this.textures.front = this.textures.back;
     this.textures.back = tmp;
@@ -131,13 +131,13 @@ GOL.prototype.swap = function() {
 };
 
 /**
- * Step the Game of Life state on the GPU without rendering anything.
- * @returns {GOL} this
+ * Step the state on the GPU without rendering anything.
+ * @returns {RD} this
  */
-GOL.prototype.step = function() {
-    if (GOL.now() != this.lasttick) {
+RD.prototype.step = function() {
+    if (RD.now() != this.lasttick) {
         $('.fps').text(this.fps + ' FPS');
-        this.lasttick = GOL.now();
+        this.lasttick = RD.now();
         this.fps = 0;
     } else {
         this.fps++;
@@ -156,10 +156,10 @@ GOL.prototype.step = function() {
 };
 
 /**
- * Render the Game of Life state stored on the GPU.
- * @returns {GOL} this
+ * Render the state stored on the GPU.
+ * @returns {RD} this
  */
-GOL.prototype.draw = function() {
+RD.prototype.draw = function() {
     var gl = this.igloo.gl;
     this.igloo.defaultFramebuffer.bind();
     this.textures.front.bind(0);
@@ -177,9 +177,9 @@ GOL.prototype.draw = function() {
  * @param {number} x
  * @param {number} y
  * @param {boolean} state True/false for live/dead
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.poke = function(x, y, state) {
+RD.prototype.poke = function(x, y, state) {
     var gl = this.igloo.gl,
         v = state * 255;
     this.textures.front.subset([v, v, v, 255], x, y, 1, 1);
@@ -189,7 +189,7 @@ GOL.prototype.poke = function(x, y, state) {
 /**
  * @returns {Object} Boolean array-like of the simulation state
  */
-GOL.prototype.get = function() {
+RD.prototype.get = function() {
     var gl = this.igloo.gl, w = this.statesize[0], h = this.statesize[1];
     this.framebuffers.step.attach(this.textures.front);
     var rgba = new Uint8Array(w * h * 4);
@@ -203,13 +203,13 @@ GOL.prototype.get = function() {
 
 /**
  * Run the simulation automatically on a timer.
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.start = function() {
+RD.prototype.start = function() {
     if (this.timer == null) {
         this.timer = setInterval(function(){
-            gol.step();
-            gol.draw();
+            rd.step();
+            rd.draw();
         }, 60);
     }
     return this;
@@ -217,9 +217,9 @@ GOL.prototype.start = function() {
 
 /**
  * Stop animating the simulation.
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.stop = function() {
+RD.prototype.stop = function() {
     clearInterval(this.timer);
     this.timer = null;
     return this;
@@ -227,9 +227,9 @@ GOL.prototype.stop = function() {
 
 /**
  * Toggle the animation state.
- * @returns {GOL} this
+ * @returns {RD} this
  */
-GOL.prototype.toggle = function() {
+RD.prototype.toggle = function() {
     if (this.timer == null) {
         this.start();
     } else {
@@ -242,7 +242,7 @@ GOL.prototype.toggle = function() {
  * This is a workaround for Firefox bug #69787 and jQuery bug #8523.
  * @returns {Array} target-relative offset
  */
-GOL.prototype.eventCoord = function(event) {
+RD.prototype.eventCoord = function(event) {
     var $target = $(event.target),
         offset = $target.offset(),
         border = 1,
@@ -254,25 +254,25 @@ GOL.prototype.eventCoord = function(event) {
 /**
  * Manages the user interface for a simulation.
  */
-function Controller(gol) {
-    this.gol = gol;
+function Controller(rd) {
+    this.rd = rd;
     var _this = this,
-        $canvas = $(gol.igloo.canvas);
+        $canvas = $(rd.igloo.canvas);
     this.drag = null;
     $canvas.on('mousedown', function(event) {
         _this.drag = event.which;
-        var pos = gol.eventCoord(event);
-        gol.poke(pos[0], pos[1], _this.drag == 1);
-        gol.draw();
+        var pos = rd.eventCoord(event);
+        rd.poke(pos[0], pos[1], _this.drag == 1);
+        rd.draw();
     });
     $canvas.on('mouseup', function(event) {
         _this.drag = null;
     });
     $canvas.on('mousemove', function(event) {
         if (_this.drag) {
-            var pos = gol.eventCoord(event);
-            gol.poke(pos[0], pos[1], _this.drag == 1);
-            gol.draw();
+            var pos = rd.eventCoord(event);
+            rd.poke(pos[0], pos[1], _this.drag == 1);
+            rd.draw();
         }
     });
     $canvas.on('contextmenu', function(event) {
@@ -282,21 +282,21 @@ function Controller(gol) {
     $(document).on('keyup', function(event) {
         switch (event.which) {
         case 82: /* r */
-            gol.setRandom();
-            gol.draw();
+            rd.setRandom();
+            rd.draw();
             break;
         case 46: /* [delete] */
-            gol.setEmpty();
-            gol.draw();
+            rd.setEmpty();
+            rd.draw();
             break;
         case 32: /* [space] */
-            gol.toggle();
+            rd.toggle();
             break;
         case 83: /* s */
             if (event.shiftKey) {
-                if (this._save) gol.set(this._save);
+                if (this._save) rd.set(this._save);
             } else {
-                this._save = gol.get();
+                this._save = rd.get();
             }
             break;
         };
@@ -304,11 +304,11 @@ function Controller(gol) {
 }
 
 /* Initialize everything. */
-var gol = null, controller = null;
+var rd = null, controller = null;
 $(document).ready(function() {
-    var $canvas = $('#life');
-    gol = new GOL($canvas[0]).draw().start();
-    controller = new Controller(gol);
+    var $canvas = $('#rd');
+    rd = new RD($canvas[0]).draw().start();
+    controller = new Controller(rd);
 });
 
 /* Don't scroll on spacebar. */
