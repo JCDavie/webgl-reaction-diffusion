@@ -20,7 +20,7 @@ function GOL(canvas, scale) {
 
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
-        copy: igloo.program('glsl/quad.vert', 'glsl/copy.frag'),
+        copy: igloo.program('glsl/quad.vert', 'glsl/render.frag'),
         gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag')
     };
     this.buffers = {

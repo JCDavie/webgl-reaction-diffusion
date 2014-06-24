@@ -6,5 +6,6 @@ uniform sampler2D state;
 uniform vec2 scale;
 
 void main() {
-    gl_FragColor = texture2D(state, gl_FragCoord.xy / scale);
+    float val = texture2D(state, gl_FragCoord.xy / scale).x;
+    gl_FragColor = vec4( val, 0, 0, 1.0 );
 }
