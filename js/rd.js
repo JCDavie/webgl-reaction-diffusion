@@ -20,8 +20,8 @@ function GOL(canvas, scale) {
 
     gl.disable(gl.DEPTH_TEST);
     this.programs = {
-        copy: igloo.program('glsl/quad.vert', 'glsl/render.frag'),
-        gol:  igloo.program('glsl/quad.vert', 'glsl/gol.frag')
+        render: igloo.program('glsl/quad.vert', 'glsl/render.frag'),
+        update: igloo.program('glsl/quad.vert', 'glsl/update.frag')
     };
     this.buffers = {
         quad: igloo.array(Igloo.QUAD2)
@@ -146,7 +146,7 @@ GOL.prototype.step = function() {
     this.framebuffers.step.attach(this.textures.back);
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.statesize[0], this.statesize[1]);
-    this.programs.gol.use()
+    this.programs.update.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
@@ -164,7 +164,7 @@ GOL.prototype.draw = function() {
     this.igloo.defaultFramebuffer.bind();
     this.textures.front.bind(0);
     gl.viewport(0, 0, this.viewsize[0], this.viewsize[1]);
-    this.programs.copy.use()
+    this.programs.render.use()
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.viewsize)
