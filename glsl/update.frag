@@ -4,6 +4,15 @@ precision mediump float;
 
 uniform sampler2D state;
 uniform vec2 scale;
+uniform vec2 range; // ( low, high )
+
+float from01( float val ) {
+    return val * ( range.y - range.x ) + range.x;
+}
+
+float to01( float val ) {
+    return ( val - range.x ) / ( range.y - range.x );
+}
 
 vec4 get(vec2 offset) {
     return texture2D(state, (gl_FragCoord.xy + offset) / scale);

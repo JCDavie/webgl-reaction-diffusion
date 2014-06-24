@@ -11,6 +11,7 @@ function RD(canvas, scale) {
         throw new Error('No WebGL');
     }
     scale = this.scale = scale || 4;
+    this.range = vec2( 0.0, 4.0 );
     var w = canvas.width, h = canvas.height;
     this.viewsize = new Float32Array([w, h]);
     this.statesize = new Float32Array([w / scale, h / scale]);
@@ -150,6 +151,7 @@ RD.prototype.step = function() {
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
+        .uniform('range', this.range)
         .draw(gl.TRIANGLE_STRIP, 4);
     this.swap();
     return this;
@@ -168,6 +170,7 @@ RD.prototype.draw = function() {
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.viewsize)
+        .uniform('range', this.range)
         .draw(gl.TRIANGLE_STRIP, 4);
     return this;
 };
