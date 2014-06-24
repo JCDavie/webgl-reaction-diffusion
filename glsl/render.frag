@@ -4,14 +4,14 @@ precision mediump float;
 
 uniform sampler2D state;
 uniform vec2 scale;
-uniform vec2 range;
 
-float to01( float val ) {
-    return ( val - range.x ) / ( range.y - range.x );
+float unpack( vec4 c ) {
+    // convert 4x[0,1] (stored as bytes) to [0,1]
+    return c.x + c.y / 256.0 + c.z / 65536.0 + c.w / 16777216.0;
 }
 
 void main() {
-    float val = texture2D(state, gl_FragCoord.xy / scale).x;
-    float mapped_val = to01( val );
-    gl_FragColor = vec4( mapped_val, 0, 0, 1.0 );
+    vec4 c = texture2D(state, gl_FragCoord.xy / scale);
+    float val = unpack( c );
+    gl_FragColor = vec4( val, val, val, 1.0 );
 }

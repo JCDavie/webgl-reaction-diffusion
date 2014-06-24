@@ -11,7 +11,6 @@ function RD(canvas, scale) {
         throw new Error('No WebGL');
     }
     scale = this.scale = scale || 4;
-    this.range = vec2( 0.0, 4.0 );
     var w = canvas.width, h = canvas.height;
     this.viewsize = new Float32Array([w, h]);
     this.statesize = new Float32Array([w / scale, h / scale]);
@@ -88,8 +87,8 @@ RD.prototype.set = function(state) {
     var rgba = new Uint8Array(this.statesize[0] * this.statesize[1] * 4);
     for (var i = 0; i < state.length; i++) {
         var ii = i * 4;
-        rgba[ii + 0] = rgba[ii + 1] = rgba[ii + 2] = state[i] ? 255 : 0;
-        rgba[ii + 3] = 255;
+        rgba[ii + 0] = state[i] ? 255 : 0;
+        rgba[ii + 1] = rgba[ii + 2] = rgba[ii + 3] = 0;
     }
     this.textures.front.subset(rgba, 0, 0, this.statesize[0], this.statesize[1]);
     return this;
@@ -151,7 +150,6 @@ RD.prototype.step = function() {
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.statesize)
-        .uniform('range', this.range)
         .draw(gl.TRIANGLE_STRIP, 4);
     this.swap();
     return this;
@@ -170,7 +168,6 @@ RD.prototype.draw = function() {
         .attrib('quad', this.buffers.quad, 2)
         .uniformi('state', 0)
         .uniform('scale', this.viewsize)
-        .uniform('range', this.range)
         .draw(gl.TRIANGLE_STRIP, 4);
     return this;
 };
@@ -211,7 +208,8 @@ RD.prototype.get = function() {
 RD.prototype.start = function() {
     if (this.timer == null) {
         this.timer = setInterval(function(){
-            rd.step();
+            for( var i = 0; i < 10; ++i )
+                rd.step();
             rd.draw();
         }, 60);
     }
